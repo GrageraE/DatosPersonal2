@@ -16,7 +16,7 @@ public:
     ~MainWindow();
 
     struct Datos{
-        QString nombre[100], matricula[100], hora[100];
+        QString nombre[100], matricula[100], hora[100], frases[100];
         int autorizacion[100];
         int count = -1;
     }dato;
@@ -35,6 +35,12 @@ private slots:
     void conectar();
 
     void on_pushButton_2_clicked();
+
+    void on_toolButton_clicked();
+
+    void on_pushButton_clicked();
+
+    void on_pushButton_5_clicked();
 
 private:
     Ui::MainWindow *ui;
