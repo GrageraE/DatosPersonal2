@@ -25,7 +25,9 @@ MainWindow::MainWindow(QWidget *parent) :
     columnas <<"Nombre" <<"Matrícula" <<"Hora" <<"Autorización";
     ui->tableWidget->setHorizontalHeaderLabels(columnas);
     ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers); //Desactivar edición
-    ui->tableWidget->setUpdatesEnabled(true);
+    ui->tableWidget->setUpdatesEnabled(true); //Activar las actualizaciones de la tabla
+    //Recoger la configuración
+    ventanaConf ventanaconf; //Al ejecutarse el constructor, se recogen los datos
     //Conectar a MySql
     conectar();
     recogerCount();
@@ -45,11 +47,12 @@ void MainWindow::on_pushButton_6_clicked()
 void MainWindow::conectar()
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
-    db.setHostName("localhost");
+    ventanaConf v;
+    db.setHostName(QString::fromStdString(v.archivo.temp[3]));
     db.setPort(3306);
-    db.setUserName("root");
-    db.setPassword("123456");
-    db.setDatabaseName("qt");
+    db.setUserName(QString::fromStdString(v.archivo.temp[0]));
+    db.setPassword(QString::fromStdString(v.archivo.temp[1]));
+    db.setDatabaseName(QString::fromStdString(v.archivo.temp[2]));
     if(!db.open())
     {
         QMessageBox::information(this, "Error", db.lastError().text());
@@ -121,11 +124,12 @@ void MainWindow::crearTabla(int count)
 
 void MainWindow::insertarDatos(QString nom, QString matr, QString hora, int autori, int count) //Al servidor
 {
+    ventanaConf v;
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
-    db.setDatabaseName("qt");
-    db.setHostName("localhost");
-    db.setUserName("root");
-    db.setPassword("123456");
+    db.setDatabaseName(QString::fromStdString(v.archivo.temp[2]));
+    db.setHostName(QString::fromStdString(v.archivo.temp[3]));
+    db.setUserName(QString::fromStdString(v.archivo.temp[0]));
+    db.setPassword(QString::fromStdString(v.archivo.temp[1]));
     db.setPort(3306);
     db.open();
     if(!db.tables().contains("person" + QString::number(count)))
@@ -190,7 +194,7 @@ void MainWindow::on_pushButton_clicked()
     ui->tableWidget->removeRow(fila); //PASO 2 - Eliminar la fila
     ui->label->setText("La columna " + QString::number(fila+1) + " se ha eliminado correctamente");
     //PASO 3 - Revertir la cuenta
-    std::ofstream cuenta;
+    ofstream cuenta;
     dato.count--;
     cuenta.open("usuario/count.txt", std::ios::out);
     cuenta <<dato.count;
@@ -198,7 +202,7 @@ void MainWindow::on_pushButton_clicked()
     return;
 }
 
-void MainWindow::on_pushButton_5_clicked()
+void MainWindow::on_pushButton_5_clicked() //VentanaConf
 {
     ventanaConf ventanaconf;
     ventanaconf.setModal(true);

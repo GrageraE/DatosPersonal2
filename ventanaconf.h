@@ -2,6 +2,9 @@
 #define VENTANACONF_H
 
 #include <QDialog>
+#include <fstream>
+#include <string>
+using namespace std;
 
 namespace Ui {
 class ventanaConf;
@@ -15,9 +18,15 @@ public:
     explicit ventanaConf(QWidget *parent = nullptr);
     ~ventanaConf();
 
-    void recogerConf();
+    struct
+    {
+        ifstream usuario, contra, db, serv;
+        string temp[4]; //usuario, contraseña, db, servidor
+    }archivo;
 
-    // void primerArranque();
+    bool recogerConf();
+
+    void primerArrnque();
 
 private slots:
     void on_pushButton_clicked();
@@ -27,6 +36,8 @@ private slots:
     void on_toolButton_clicked();
 
     void on_pushButton_2_clicked();
+
+    void on_pushButton_4_clicked();
 
 private:
     Ui::ventanaConf *ui;

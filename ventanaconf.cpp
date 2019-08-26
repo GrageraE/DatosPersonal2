@@ -4,8 +4,6 @@
 #include <QSqlQuery>
 #include <fstream>
 #include <QMessageBox>
-#include <QCryptographicHash>
-
 using namespace std;
 
 ventanaConf::ventanaConf(QWidget *parent) :
@@ -15,7 +13,10 @@ ventanaConf::ventanaConf(QWidget *parent) :
     ui->setupUi(this);
     ui->password->setEchoMode(QLineEdit::Password); //Ocultar la contraseña
     //Recoger datos
-    recogerConf();
+    if(!recogerConf())
+    {
+        primerArrnque();
+    }
 }
 
 ventanaConf::~ventanaConf()
@@ -23,23 +24,15 @@ ventanaConf::~ventanaConf()
     delete ui;
 }
 
-struct
-{
-    ifstream usuario, contra, db, serv;
-    string temp[4];
-}archivo;
-
-void ventanaConf::recogerConf()
+bool ventanaConf::recogerConf()
 {
     //PASO 1 - Recoger el usuario
     archivo.usuario.open("usuario/user.txt", ios::in);
     if(archivo.usuario.fail())
     {
-        //No hace falta - TODO: Eliminar esta línea:
-        //primerArranque();
         QMessageBox::information(this, "Error", "Ha habido un problema importante. El programa"
                                                 " se cerrará");
-        exit(0);
+        return false;
     }
     while(!archivo.usuario.eof())
     {
@@ -67,7 +60,37 @@ void ventanaConf::recogerConf()
         getline(archivo.contra, archivo.temp[1]);
     }
     archivo.contra.close();
-    //TODO - El proceso de haseho completo
+    //TODO - El proceso de encriptación completo
+    return true;
+}
+
+void ventanaConf::primerArrnque()
+{
+    QMessageBox::information(this, "Información", "Primer arranque: se escribirán los datos básicos para "
+                                                  "usar la aplicación. Podrás cambiarlos desde la "
+                                                  "configuración");
+    ofstream usuario, contra, db, serv;
+    usuario.open("usuario/user.txt", ios::out);
+    if(usuario.fail())
+    {
+        QMessageBox::information(this, "Error", "Ha ocurrido un error importante. La app "
+                                                "se cerrará");
+        exit(1);
+    }
+    usuario <<"root";
+    usuario.close();
+    contra.open("usuario/pass.txt", ios::out);
+    contra <<"123456";
+    contra.close();
+    db.open("usuario/db.txt", ios::out);
+    db <<"qt";
+    db.close();
+    serv.open("usuario/serv.txt", ios::out);
+    serv <<"localhost";
+    serv.close();
+    QMessageBox::information(this, "Información", "Primer arranque completado. Archivos escritos "
+                                                  "correctamente.");
+    return;
 }
 
 void ventanaConf::on_pushButton_clicked()
@@ -99,4 +122,33 @@ void ventanaConf::on_pushButton_2_clicked()
     ui->usuario->setText("root");
     ui->password->setText("123456");
     ui->db->setText("qt");
+}
+
+void ventanaConf::on_pushButton_4_clicked()
+{
+    QString usuario, contra, serv, db;
+    usuario = ui->usuario->text();
+    contra = ui->password->text();
+    serv = ui->servidor->text();
+    db = ui->db->text();
+    ofstream user, pass, host, database;
+    user.open("usuario/user.txt", ios::out);
+    if(user.fail())
+    {
+        QMessageBox::information(this, "Error", "Ha ocurrido un error al guardar la configuración");
+        reject();
+    }
+    user <<usuario.toStdString();
+    user.close();
+    pass.open("usuario/pass.txt", ios::out);
+    pass <<contra.toStdString();
+    pass.close();
+    host.open("usuario/serv.txt", ios::out);
+    host <<serv.toStdString();
+    host.close();
+    database.open("usuario/db.txt", ios::out);
+    database <<db.toStdString();
+    database.close();
+    QMessageBox::information(this, "Información", "Configuración guardada");
+    return;
 }
